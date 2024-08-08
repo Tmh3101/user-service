@@ -1,8 +1,9 @@
 package com.Tmh3101.user_manager.service.Impl;
 
 import com.Tmh3101.user_manager.dto.request.AuthenticationRequest;
+import com.Tmh3101.user_manager.dto.request.IntrospectRequest;
 import com.Tmh3101.user_manager.dto.response.AuthenticationResponse;
-import com.Tmh3101.user_manager.dto.response.UserResponse;
+import com.Tmh3101.user_manager.dto.response.IntrospectResponse;
 import com.Tmh3101.user_manager.entity.User;
 import com.Tmh3101.user_manager.exception.AppException;
 import com.Tmh3101.user_manager.exception.ErrorCode;
@@ -10,14 +11,18 @@ import com.Tmh3101.user_manager.repo.UserRepo;
 import com.Tmh3101.user_manager.service.AuthenticationService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -30,7 +35,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public UserRepo userRepo;
 
     @NonFinal
-    protected static final String SIGNER_KEY = "z+OdAFzcK3Ww4Dw1W59X91Gp5J3NqZb4yHkmzSUtPRRTPaLaVbQvt3sauDrL5A9I";
+    @Value("${jwt.signerKey}")
+    protected String SIGNER_KEY;
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
@@ -78,6 +84,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public IntrospectResponse introspect(IntrospectRequest introspectRequest)
+            throws JOSEException, ParseException {
+
+        String token = introspectRequest.getToken();
+        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        boolean verified = signedJWT.verify(jwsVerifier);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        boolean expired = expiryTime.after(new Date());
+
+        return IntrospectResponse.builder()
+                .valid(verified && expired)
+                .build();
+    }
+
 
 
 }
