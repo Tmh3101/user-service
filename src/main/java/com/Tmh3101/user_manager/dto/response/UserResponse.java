@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import java.sql.Date;
+import java.util.Set;
 
 @Data
 @Builder
@@ -18,4 +19,5 @@ public class UserResponse {
     Date dateOfBirth;
     String phoneNumber;
     String address;
+    Set<String> roles;
 }

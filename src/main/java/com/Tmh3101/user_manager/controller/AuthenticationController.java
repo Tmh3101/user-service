@@ -7,6 +7,9 @@ import com.Tmh3101.user_manager.dto.response.AuthenticationResponse;
 import com.Tmh3101.user_manager.dto.response.IntrospectResponse;
 import com.Tmh3101.user_manager.service.Impl.AuthenticationServiceImpl;
 import com.nimbusds.jose.JOSEException;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,12 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    @Autowired
-    private AuthenticationServiceImpl authenticationServiceImpl;
+    AuthenticationServiceImpl authenticationServiceImpl;
 
     @PostMapping("/token")
     public ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest authenticationRequest){

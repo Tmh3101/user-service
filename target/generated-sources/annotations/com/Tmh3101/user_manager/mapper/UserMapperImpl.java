@@ -3,6 +3,8 @@ package com.Tmh3101.user_manager.mapper;
 import com.Tmh3101.user_manager.dto.request.UserCreationRequest;
 import com.Tmh3101.user_manager.dto.response.UserResponse;
 import com.Tmh3101.user_manager.entity.User;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +64,10 @@ public class UserMapperImpl implements UserMapper {
         userResponse.dateOfBirth( user.getDateOfBirth() );
         userResponse.phoneNumber( user.getPhoneNumber() );
         userResponse.address( user.getAddress() );
+        Set<String> set = user.getRoles();
+        if ( set != null ) {
+            userResponse.roles( new LinkedHashSet<String>( set ) );
+        }
 
         return userResponse.build();
     }

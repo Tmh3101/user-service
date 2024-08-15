@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.sql.Date;
+import java.util.Set;
 
 @Entity
 @Data
@@ -26,4 +27,5 @@ public class User {
     String phoneNumber;
     String address;
     String password;
+    Set<String> roles;
 }

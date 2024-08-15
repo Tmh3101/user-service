@@ -1,29 +1,32 @@
 package com.Tmh3101.user_manager.service.Impl;
 
-
 import com.Tmh3101.user_manager.dto.request.UserCreationRequest;
 import com.Tmh3101.user_manager.dto.response.UserResponse;
 import com.Tmh3101.user_manager.entity.User;
+import com.Tmh3101.user_manager.enums.Role;
 import com.Tmh3101.user_manager.exception.AppException;
 import com.Tmh3101.user_manager.exception.ErrorCode;
 import com.Tmh3101.user_manager.mapper.UserMapper;
 import com.Tmh3101.user_manager.repo.UserRepo;
 import com.Tmh3101.user_manager.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    public UserRepo userRepo;
-    @Autowired
-    public UserMapper userMapper;
+    UserRepo userRepo;
+    UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
     @Override
     public List<UserResponse> getAllUser() {
@@ -52,8 +55,10 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.PHONE_NUMBER_EXISTED);
 
         User user = userMapper.toUser(userCreationRequest);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+        user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userMapper.toUserResponse(userRepo.save(user));
@@ -73,7 +78,8 @@ public class UserServiceImpl implements UserService {
     }
 
     public User getUser(String id){
-        return userRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_ANY_USERS));
+        return userRepo.findById(id).orElseThrow(() ->
+                new AppException(ErrorCode.NOT_FOUND_ANY_USERS)
+        );
     }
-
 }

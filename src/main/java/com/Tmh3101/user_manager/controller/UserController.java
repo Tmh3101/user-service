@@ -5,43 +5,65 @@ import com.Tmh3101.user_manager.dto.request.UserCreationRequest;
 import com.Tmh3101.user_manager.dto.response.UserResponse;
 import com.Tmh3101.user_manager.service.Impl.UserServiceImpl;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    public UserServiceImpl userServiceImpl;
+    UserServiceImpl userServiceImpl;
 
     @GetMapping("")
-    public ResponseEntity<?> getAllUser(){
-        return ResponseEntity.ok(userServiceImpl.getAllUser());
+    public ApiResponse<List<UserResponse>> getAllUser(){
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("User name: {}", authentication.getName());
+        authentication.getAuthorities().forEach(role -> log.info(role.getAuthority()));
+
+        return ApiResponse.<List<UserResponse>>builder()
+                .code(1000)
+                .result(userServiceImpl.getAllUser())
+                .build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable String id){
-        return ResponseEntity.ok(userServiceImpl.getUserById(id));
+    public ApiResponse<UserResponse> getUserById(@PathVariable String id){
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userServiceImpl.getUserById(id))
+                .build();
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest){
-        ApiResponse<UserResponse> apiResponse = ApiResponse.<UserResponse>builder()
-                                        .code(1000)
-                                        .result(userServiceImpl.createUser(userCreationRequest))
-                                        .build();
-        return ResponseEntity.ok(apiResponse);
+    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest){
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userServiceImpl.createUser(userCreationRequest))
+                .build();
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody @Valid UserCreationRequest userCreationRequest){
-        return ResponseEntity.ok(userServiceImpl.updateUser(id, userCreationRequest));
+    public ApiResponse<UserResponse> updateUser(@PathVariable String id, @RequestBody @Valid UserCreationRequest userCreationRequest){
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userServiceImpl.updateUser(id, userCreationRequest))
+                .build();
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteUserById(@PathVariable String id){
-        return ResponseEntity.ok(userServiceImpl.deleteUserById(id));
+    public ApiResponse<UserResponse> deleteUserById(@PathVariable String id){
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userServiceImpl.deleteUserById(id))
+                .build();
     }
 }

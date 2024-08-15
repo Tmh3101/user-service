@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Slf4j
 @Service
@@ -49,30 +50,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(!authenticated)
             throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-        var token = generateToken(authenticationRequest.getEmail());
-
+        var token = generateToken(user);
         return AuthenticationResponse.builder()
                 .token(token)
                 .authenticated(true)
                 .build();
     }
 
-    private String generateToken(String email){
+    private String generateToken(User user){
+
         //Header
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         //Claim in Payload
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(email)
+                .subject(user.getEmail())
                 .issuer("Tmh3101.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
-                .claim("customField", "customValue")
+                .claim("scope", buildScope(user))
                 .build();
 
         //Payload
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-
         JWSObject jwsObject = new JWSObject(jwsHeader, payload);
 
         try {
@@ -103,6 +103,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
     }
 
-
-
+    private String buildScope(User user){
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        user.getRoles().forEach(stringJoiner::add);
+        return stringJoiner.toString();
+    }
 }
