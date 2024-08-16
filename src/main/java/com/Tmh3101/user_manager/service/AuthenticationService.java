@@ -9,6 +9,6 @@ import com.nimbusds.jose.JOSEException;
 import java.text.ParseException;
 
 public interface AuthenticationService {
-    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest);
-    public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException;
+    AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest);
+    IntrospectResponse introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException;
 }

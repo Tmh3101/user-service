@@ -12,11 +12,9 @@ import com.Tmh3101.user_manager.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,10 +25,10 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     UserRepo userRepo;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
@@ -42,7 +40,6 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepo.findAll();
         if(users.isEmpty())
             throw new AppException(ErrorCode.NOT_FOUND_ANY_USERS);
-
         List<UserResponse> result = new ArrayList<>();
         users.forEach((user) ->
                 result.addLast(userMapper.toUserResponse(user))
@@ -66,7 +63,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
-
     @Override
     public UserResponse createUser(UserCreationRequest userCreationRequest) {
 
@@ -76,22 +72,22 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.PHONE_NUMBER_EXISTED);
 
         User user = userMapper.toUser(userCreationRequest);
-
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
         user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
         return userMapper.toUserResponse(userRepo.save(user));
     }
 
     @Override
+    @PreAuthorize("returnObject.email == authentication.name")
     public UserResponse updateUser(String idUser, UserCreationRequest userCreationRequest){
         User user = getUser(idUser);
         return userMapper.toUserResponse(userRepo.save(user));
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse deleteUserById(String id) {
         User result = getUser(id);
         userRepo.deleteById(id);
