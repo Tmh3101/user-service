@@ -12,6 +12,12 @@ import com.Tmh3101.user_manager.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +30,15 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     UserRepo userRepo;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUser() {
+        log.info("In get all user method");
         List<User> users = userRepo.findAll();
         if(users.isEmpty())
             throw new AppException(ErrorCode.NOT_FOUND_ANY_USERS);
@@ -42,9 +51,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PostAuthorize("returnObject.email == authentication.name")
     public UserResponse getUserById(String id) {
         return userMapper.toUserResponse(getUser(id));
     }
+
+    @PostAuthorize("returnObject.email == authentication.name")
+    public UserResponse getMyInfo(){
+        var context = SecurityContextHolder.getContext();
+        var email = context.getAuthentication().getName();
+        User user = userRepo.findUserByEmail(email).orElseThrow(() ->
+                new AppException(ErrorCode.NOT_FOUND_ANY_USERS)
+        );
+        return userMapper.toUserResponse(user);
+    }
+
 
     @Override
     public UserResponse createUser(UserCreationRequest userCreationRequest) {

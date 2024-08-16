@@ -43,6 +43,14 @@ public class UserController {
                 .build();
     }
 
+    @GetMapping("/my-info")
+    public ApiResponse<UserResponse> getMyInfo(){
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userServiceImpl.getMyInfo())
+                .build();
+    }
+
     @PostMapping("/add")
     public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest){
         return ApiResponse.<UserResponse>builder()
