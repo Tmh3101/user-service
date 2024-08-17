@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,10 +47,9 @@ public class SecurityConfig {
         // authenticate with token
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
-                        jwtConfigurer.decoder(jwtDecoder())
-                                     .jwtAuthenticationConverter(jwtAuthenticationConverter()) //Reformat Prefix
-                )
-        );
+                                jwtConfigurer.decoder(jwtDecoder())
+                                             .jwtAuthenticationConverter(jwtAuthenticationConverter()) //Reformat Prefix)
+                          ).authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         // disable csrf configuration - csrf is configured automatically
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
