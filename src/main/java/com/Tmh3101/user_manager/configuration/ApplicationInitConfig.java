@@ -1,7 +1,7 @@
 package com.Tmh3101.user_manager.configuration;
 
+import com.Tmh3101.user_manager.entity.Role;
 import com.Tmh3101.user_manager.entity.User;
-import com.Tmh3101.user_manager.enums.Role;
 import com.Tmh3101.user_manager.repo.UserRepo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
+import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,8 +27,12 @@ public class ApplicationInitConfig {
     ApplicationRunner applicationRunner(UserRepo userRepo){
         return  args -> {
             if(userRepo.findUserByEmail("admin@gmail.com").isEmpty()){
-                HashSet<String> roles = new HashSet<>();
-                roles.add(Role.ADMIN.name());
+                Role role = Role.builder()
+                        .name(com.Tmh3101.user_manager.enums.Role.ADMIN.name())
+                        .description("Admin role")
+                        .build();
+                Set<Role> roles = new HashSet<>();
+                roles.add(role);
 
                 User admin = User.builder()
                         .email("admin@gmail.com")

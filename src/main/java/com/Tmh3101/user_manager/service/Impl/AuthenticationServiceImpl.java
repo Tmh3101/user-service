@@ -14,6 +14,9 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +31,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
 
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    @Autowired
-    public UserRepo userRepo;
+    UserRepo userRepo;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -41,9 +45,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
-        User user = userRepo.findUserByEmail(authenticationRequest.getEmail()).orElseThrow(
-                () -> new AppException(ErrorCode.NOT_FOUND_ANY_USERS)
-        );
+        User user = userRepo.findUserByEmail(authenticationRequest.getEmail())
+                            .orElseThrow(
+                                    () -> new AppException(ErrorCode.NOT_FOUND_ANY_USERS)
+                            );
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
@@ -105,7 +110,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private String buildScope(User user){
         StringJoiner stringJoiner = new StringJoiner(" ");
-        user.getRoles().forEach(stringJoiner::add);
+        user.getRoles().forEach(role -> stringJoiner.add(role.getName()));
         return stringJoiner.toString();
     }
 }

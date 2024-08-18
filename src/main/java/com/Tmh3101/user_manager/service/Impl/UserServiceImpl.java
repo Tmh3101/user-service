@@ -2,8 +2,8 @@ package com.Tmh3101.user_manager.service.Impl;
 
 import com.Tmh3101.user_manager.dto.request.UserCreationRequest;
 import com.Tmh3101.user_manager.dto.response.UserResponse;
+import com.Tmh3101.user_manager.entity.Role;
 import com.Tmh3101.user_manager.entity.User;
-import com.Tmh3101.user_manager.enums.Role;
 import com.Tmh3101.user_manager.exception.AppException;
 import com.Tmh3101.user_manager.exception.ErrorCode;
 import com.Tmh3101.user_manager.mapper.UserMapper;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -72,8 +73,10 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.PHONE_NUMBER_EXISTED);
 
         User user = userMapper.toUser(userCreationRequest);
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.builder()
+                .name(com.Tmh3101.user_manager.enums.Role.USER.name())
+                .build());
         user.setRoles(roles);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userMapper.toUserResponse(userRepo.save(user));

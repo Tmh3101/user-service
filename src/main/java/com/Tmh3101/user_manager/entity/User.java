@@ -1,9 +1,6 @@
 package com.Tmh3101.user_manager.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -27,5 +24,7 @@ public class User {
     String phoneNumber;
     String address;
     String password;
-    Set<String> roles;
+
+    @ManyToMany
+    Set<Role> roles;
 }
