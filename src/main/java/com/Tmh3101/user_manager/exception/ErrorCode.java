@@ -20,7 +20,8 @@ public enum ErrorCode {
     NOT_FOUND_ANY_USERS(1008, "Not found any users", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1009, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1010, "You do not permission", HttpStatus.FORBIDDEN),
-    NOT_FOUND_ANY_PERMISSION(1011, "Not found any permission", HttpStatus.NOT_FOUND)
+    NOT_FOUND_ANY_PERMISSIONS(1011, "Not found any permission", HttpStatus.NOT_FOUND),
+    NOT_FOUND_ANY_ROLES(1012, "Not found any role", HttpStatus.NOT_FOUND)
     ;
 
     private int code;

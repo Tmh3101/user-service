@@ -33,9 +33,10 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public List<PermissionResponse> getAll() {
-        return  permissionRepo.findAll().stream()
-                                        .map(permissionMapper::toPermissionResponse)
-                                        .toList();
+        return  permissionRepo.findAll()
+                .stream()
+                .map(permissionMapper::toPermissionResponse)
+                .toList();
     }
 
     @Override
@@ -47,6 +48,6 @@ public class PermissionServiceImpl implements PermissionService {
 
     private Permission getPermissionByName(String name){
         return permissionRepo.findPermissionByName(name)
-                             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_ANY_PERMISSION));
+                             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_ANY_PERMISSIONS));
     }
 }
