@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -48,21 +47,26 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public RoleResponse getRoleByName(String name){
+        return roleMapper.toRoleResponse(findRoleByName(name));
+    }
+
+
+    @Override
     public RoleResponse update(String name) {
-        Role role = getRoleByName(name);
+        Role role = findRoleByName(name);
         return roleMapper.toRoleResponse(roleRepo.save(role));
     }
 
     @Override
     public RoleResponse delete(String name) {
-        Role role = getRoleByName(name);
+        Role role = findRoleByName(name);
         roleRepo.deleteById(name);
         return roleMapper.toRoleResponse(role);
     }
 
-    private Role getRoleByName(String name){
+    Role findRoleByName(String name){
         return roleRepo.findRoleByName(name)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND_ANY_ROLES));
     }
-
 }

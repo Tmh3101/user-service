@@ -21,7 +21,8 @@ public enum ErrorCode {
     UNAUTHENTICATED(1009, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1010, "You do not permission", HttpStatus.FORBIDDEN),
     NOT_FOUND_ANY_PERMISSIONS(1011, "Not found any permission", HttpStatus.NOT_FOUND),
-    NOT_FOUND_ANY_ROLES(1012, "Not found any role", HttpStatus.NOT_FOUND)
+    NOT_FOUND_ANY_ROLES(1012, "Not found any role", HttpStatus.NOT_FOUND),
+    INVALID_DATE_OF_BIRTH(1013, "Invalid date of birth", HttpStatus.BAD_REQUEST)
     ;
 
     private int code;

@@ -1,7 +1,7 @@
 package com.Tmh3101.user_manager.controller;
 
 import com.Tmh3101.user_manager.dto.request.ApiResponse;
-import com.Tmh3101.user_manager.dto.request.UserCreationRequest;
+import com.Tmh3101.user_manager.dto.request.UserRequest;
 import com.Tmh3101.user_manager.dto.response.UserResponse;
 import com.Tmh3101.user_manager.service.Impl.UserServiceImpl;
 import jakarta.validation.Valid;
@@ -25,10 +25,7 @@ public class UserController {
 
     @GetMapping("")
     public ApiResponse<List<UserResponse>> getAllUser(){
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("User name: {}", authentication.getName());
-        authentication.getAuthorities().forEach(role -> log.info(role.getAuthority()));
-
+        logInfor("get all users");
         return ApiResponse.<List<UserResponse>>builder()
                 .code(1000)
                 .result(userServiceImpl.getAllUser())
@@ -37,6 +34,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getUserById(@PathVariable String id){
+        logInfor("get user by id");
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .result(userServiceImpl.getUserById(id))
@@ -45,6 +43,7 @@ public class UserController {
 
     @GetMapping("/my-info")
     public ApiResponse<UserResponse> getMyInfo(){
+        logInfor("get my information");
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .result(userServiceImpl.getMyInfo())
@@ -52,15 +51,16 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest){
+    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserRequest request){
+        logInfor("create user");
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
-                .result(userServiceImpl.createUser(userCreationRequest))
+                .result(userServiceImpl.createUser(request))
                 .build();
     }
 
     @PutMapping("/update/{id}")
-    public ApiResponse<UserResponse> updateUser(@PathVariable String id, @RequestBody @Valid UserCreationRequest userCreationRequest){
+    public ApiResponse<UserResponse> updateUser(@PathVariable String id, @RequestBody @Valid UserRequest userCreationRequest){
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .result(userServiceImpl.updateUser(id, userCreationRequest))
@@ -73,5 +73,15 @@ public class UserController {
                 .code(1000)
                 .result(userServiceImpl.deleteUserById(id))
                 .build();
+    }
+
+    private void logInfor(String methodName){
+        log.info("In method {}:", methodName);
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("User email: {}", authentication.getName());
+        log.info("Role and Permisssion:");
+        authentication.getAuthorities().forEach(grant ->
+                log.info(grant.getAuthority())
+        );
     }
 }

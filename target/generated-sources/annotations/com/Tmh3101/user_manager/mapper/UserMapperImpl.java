@@ -1,7 +1,11 @@
 package com.Tmh3101.user_manager.mapper;
 
-import com.Tmh3101.user_manager.dto.request.UserCreationRequest;
+import com.Tmh3101.user_manager.dto.request.UserRequest;
+import com.Tmh3101.user_manager.dto.response.PermissionResponse;
+import com.Tmh3101.user_manager.dto.response.RoleResponse;
 import com.Tmh3101.user_manager.dto.response.UserResponse;
+import com.Tmh3101.user_manager.entity.Permission;
+import com.Tmh3101.user_manager.entity.Role;
 import com.Tmh3101.user_manager.entity.User;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -16,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class UserMapperImpl implements UserMapper {
 
     @Override
-    public User toUser(UserCreationRequest userCreationRequest) {
+    public User toUser(UserRequest userCreationRequest) {
         if ( userCreationRequest == null ) {
             return null;
         }
@@ -35,7 +39,7 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public void updateUser(User user, UserCreationRequest userCreationRequest) {
+    public void updateUser(User user, UserRequest userCreationRequest) {
         if ( userCreationRequest == null ) {
             return;
         }
@@ -64,11 +68,61 @@ public class UserMapperImpl implements UserMapper {
         userResponse.dateOfBirth( user.getDateOfBirth() );
         userResponse.phoneNumber( user.getPhoneNumber() );
         userResponse.address( user.getAddress() );
-        Set<String> set = user.getRoles();
-        if ( set != null ) {
-            userResponse.roles( new LinkedHashSet<String>( set ) );
-        }
+        userResponse.roles( roleSetToRoleResponseSet( user.getRoles() ) );
 
         return userResponse.build();
+    }
+
+    protected PermissionResponse permissionToPermissionResponse(Permission permission) {
+        if ( permission == null ) {
+            return null;
+        }
+
+        PermissionResponse.PermissionResponseBuilder permissionResponse = PermissionResponse.builder();
+
+        permissionResponse.name( permission.getName() );
+        permissionResponse.description( permission.getDescription() );
+
+        return permissionResponse.build();
+    }
+
+    protected Set<PermissionResponse> permissionSetToPermissionResponseSet(Set<Permission> set) {
+        if ( set == null ) {
+            return null;
+        }
+
+        Set<PermissionResponse> set1 = new LinkedHashSet<PermissionResponse>( Math.max( (int) ( set.size() / .75f ) + 1, 16 ) );
+        for ( Permission permission : set ) {
+            set1.add( permissionToPermissionResponse( permission ) );
+        }
+
+        return set1;
+    }
+
+    protected RoleResponse roleToRoleResponse(Role role) {
+        if ( role == null ) {
+            return null;
+        }
+
+        RoleResponse roleResponse = new RoleResponse();
+
+        roleResponse.setName( role.getName() );
+        roleResponse.setDescription( role.getDescription() );
+        roleResponse.setPermissions( permissionSetToPermissionResponseSet( role.getPermissions() ) );
+
+        return roleResponse;
+    }
+
+    protected Set<RoleResponse> roleSetToRoleResponseSet(Set<Role> set) {
+        if ( set == null ) {
+            return null;
+        }
+
+        Set<RoleResponse> set1 = new LinkedHashSet<RoleResponse>( Math.max( (int) ( set.size() / .75f ) + 1, 16 ) );
+        for ( Role role : set ) {
+            set1.add( roleToRoleResponse( role ) );
+        }
+
+        return set1;
     }
 }

@@ -1,6 +1,5 @@
 package com.Tmh3101.user_manager.dto.response;
 
-import com.Tmh3101.user_manager.entity.Permission;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -110,7 +109,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private String buildScope(User user){
         StringJoiner stringJoiner = new StringJoiner(" ");
-        user.getRoles().forEach(role -> stringJoiner.add(role.getName()));
+        user.getRoles().forEach(role -> {
+                stringJoiner.add("ROLE_" + role.getName());
+                role.getPermissions().forEach(permission ->
+                    stringJoiner.add(permission.getName())
+                );
+            }
+        );
         return stringJoiner.toString();
     }
 }
