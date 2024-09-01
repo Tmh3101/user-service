@@ -21,7 +21,7 @@ public class UserRequest {
     String email;
     String firstName;
     String lastName;
-    @DobConstraint(min = 18, message = "INVALID_DATE_OF_BIRTH")
+    @DobConstraint(min = 16, message = "INVALID_DATE_OF_BIRTH")
     Date dateOfBirth;
     @NotEmpty(message = "PHONE_NUMBER_NOT_EMPTY")
     @Size(min = 10, max = 10, message = "PHONE_NUMBER_VALID")

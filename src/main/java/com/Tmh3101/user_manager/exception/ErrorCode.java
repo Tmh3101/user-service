@@ -12,6 +12,7 @@ public enum ErrorCode {
     EMAIL_EXISTED(1001, "Email existed", HttpStatus.BAD_REQUEST),
     PHONE_NUMBER_EXISTED(1002, "Phone number existed", HttpStatus.BAD_REQUEST),
     UNCATEGORIZED_ERROR(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_KEY(9998, "Invalid key", HttpStatus.INTERNAL_SERVER_ERROR),
     EMAIL_NOT_EMPTY(1003, "Email must be not empty", HttpStatus.BAD_REQUEST),
     EMAIL_VALID(1004, "Email invalid", HttpStatus.BAD_REQUEST),
     PHONE_NUMBER_NOT_EMPTY(1005, "Phone number must be not empty", HttpStatus.BAD_REQUEST),
@@ -22,7 +23,7 @@ public enum ErrorCode {
     UNAUTHORIZED(1010, "You do not permission", HttpStatus.FORBIDDEN),
     NOT_FOUND_ANY_PERMISSIONS(1011, "Not found any permission", HttpStatus.NOT_FOUND),
     NOT_FOUND_ANY_ROLES(1012, "Not found any role", HttpStatus.NOT_FOUND),
-    INVALID_DATE_OF_BIRTH(1013, "Invalid date of birth", HttpStatus.BAD_REQUEST)
+    INVALID_DATE_OF_BIRTH(1013, "Your age must be at least {min}", HttpStatus.BAD_REQUEST)
     ;
 
     private int code;
