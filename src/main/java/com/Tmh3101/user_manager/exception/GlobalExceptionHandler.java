@@ -60,11 +60,8 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
 
         Map attributes = null;
-
         try {
-
             errorCode = ErrorCode.valueOf(enumKey);
-
             var constraintViolation = exception.getBindingResult()
                     .getAllErrors()
                     .getFirst()

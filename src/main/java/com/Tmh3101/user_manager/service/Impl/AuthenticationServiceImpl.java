@@ -2,11 +2,14 @@ package com.Tmh3101.user_manager.service.Impl;
 
 import com.Tmh3101.user_manager.dto.request.AuthenticationRequest;
 import com.Tmh3101.user_manager.dto.request.IntrospectRequest;
+import com.Tmh3101.user_manager.dto.request.LogoutRequest;
 import com.Tmh3101.user_manager.dto.response.AuthenticationResponse;
 import com.Tmh3101.user_manager.dto.response.IntrospectResponse;
+import com.Tmh3101.user_manager.entity.InvalidatedToken;
 import com.Tmh3101.user_manager.entity.User;
 import com.Tmh3101.user_manager.exception.AppException;
 import com.Tmh3101.user_manager.exception.ErrorCode;
+import com.Tmh3101.user_manager.repo.InvalidatedTokenRepo;
 import com.Tmh3101.user_manager.repo.UserRepo;
 import com.Tmh3101.user_manager.service.AuthenticationService;
 import com.nimbusds.jose.*;
@@ -29,6 +32,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -37,6 +41,7 @@ import java.util.StringJoiner;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     UserRepo userRepo;
+    InvalidatedTokenRepo invalidatedTokenRepo;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -72,6 +77,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .issuer("Tmh3101.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();
 
@@ -92,19 +98,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public IntrospectResponse introspect(IntrospectRequest introspectRequest)
             throws JOSEException, ParseException {
-
         String token = introspectRequest.getToken();
-        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
+        boolean isValid = true;
 
-        SignedJWT signedJWT = SignedJWT.parse(token);
-        boolean verified = signedJWT.verify(jwsVerifier);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        boolean expired = expiryTime.after(new Date());
+        try {
+            verifyToken(token);
+        } catch (AppException e){
+            isValid = false;
+        }
 
         return IntrospectResponse.builder()
-                .valid(verified && expired)
+                .valid(isValid)
                 .build();
+    }
+
+    @Override
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jti = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                                                            .id(jti)
+                                                            .expiryTime(expiryTime)
+                                                            .build();
+        invalidatedTokenRepo.save(invalidatedToken);
     }
 
     private String buildScope(User user){
@@ -117,5 +136,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
         );
         return stringJoiner.toString();
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        boolean verified = signedJWT.verify(jwsVerifier);
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        boolean expired = expiryTime.after(new Date());
+
+        if(!(verified && expired))
+            throw new AppException(ErrorCode.UNCATEGORIZED_ERROR);
+
+        if(invalidatedTokenRepo.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNCATEGORIZED_ERROR);
+
+        return signedJWT;
     }
 }

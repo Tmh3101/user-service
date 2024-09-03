@@ -27,11 +27,11 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINT = {
             "/users/add",
             "/auth/token",
-            "/auth/introspect"
+            "/auth/introspect",
+            "/auth/logout"
     };
 
-    @Value("${jwt.signerKey}")
-    private String signerKey;
+    private CustormJwtDecoder custormJwtDecoder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception{
@@ -45,7 +45,7 @@ public class SecurityConfig {
         // authenticate with token
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
-                                jwtConfigurer.decoder(jwtDecoder())
+                                jwtConfigurer.decoder(custormJwtDecoder)
                                              .jwtAuthenticationConverter(jwtAuthenticationConverter()) //Reformat Prefix)
                           ).authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         // disable csrf configuration - csrf is configured automatically
@@ -60,15 +60,6 @@ public class SecurityConfig {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
-    }
-
-    @Bean
-    JwtDecoder jwtDecoder(){
-        SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-        return NimbusJwtDecoder
-                .withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
     }
 
     @Bean

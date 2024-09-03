@@ -3,6 +3,7 @@ package com.Tmh3101.user_manager.controller;
 import com.Tmh3101.user_manager.dto.request.ApiResponse;
 import com.Tmh3101.user_manager.dto.request.AuthenticationRequest;
 import com.Tmh3101.user_manager.dto.request.IntrospectRequest;
+import com.Tmh3101.user_manager.dto.request.LogoutRequest;
 import com.Tmh3101.user_manager.dto.response.AuthenticationResponse;
 import com.Tmh3101.user_manager.dto.response.IntrospectResponse;
 import com.Tmh3101.user_manager.service.Impl.AuthenticationServiceImpl;
@@ -35,13 +36,23 @@ public class AuthenticationController {
     }
 
     @PostMapping("/introspect")
-    public ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest introspectRequest)
+    public ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
 
-        IntrospectResponse res = authenticationServiceImpl.introspect(introspectRequest);
+        IntrospectResponse res = authenticationServiceImpl.introspect(request);
         return ApiResponse.<IntrospectResponse>builder()
                 .code(1000)
                 .result(res)
+                .build();
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@RequestBody LogoutRequest request)
+            throws ParseException, JOSEException {
+
+        authenticationServiceImpl.logout(request);
+        return ApiResponse.<Void>builder()
+                .code(1000)
                 .build();
     }
 }

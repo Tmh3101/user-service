@@ -1,9 +1,6 @@
 package com.Tmh3101.user_manager.configuration;
 
-import com.Tmh3101.user_manager.entity.Role;
 import com.Tmh3101.user_manager.entity.User;
-import com.Tmh3101.user_manager.exception.AppException;
-import com.Tmh3101.user_manager.exception.ErrorCode;
 import com.Tmh3101.user_manager.repo.RoleRepo;
 import com.Tmh3101.user_manager.repo.UserRepo;
 import lombok.AccessLevel;
@@ -22,7 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
-    RoleRepo roleRepo;
 
     @Bean
     ApplicationRunner applicationRunner(UserRepo userRepo){
