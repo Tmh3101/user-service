@@ -1,9 +1,6 @@
 package com.Tmh3101.user_manager.controller;
 
-import com.Tmh3101.user_manager.dto.request.ApiResponse;
-import com.Tmh3101.user_manager.dto.request.AuthenticationRequest;
-import com.Tmh3101.user_manager.dto.request.IntrospectRequest;
-import com.Tmh3101.user_manager.dto.request.LogoutRequest;
+import com.Tmh3101.user_manager.dto.request.*;
 import com.Tmh3101.user_manager.dto.response.AuthenticationResponse;
 import com.Tmh3101.user_manager.dto.response.IntrospectResponse;
 import com.Tmh3101.user_manager.service.Impl.AuthenticationServiceImpl;
@@ -43,6 +40,7 @@ public class AuthenticationController {
         return ApiResponse.<IntrospectResponse>builder()
                 .code(1000)
                 .result(res)
+
                 .build();
     }
 
@@ -53,6 +51,16 @@ public class AuthenticationController {
         authenticationServiceImpl.logout(request);
         return ApiResponse.<Void>builder()
                 .code(1000)
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request)
+            throws ParseException, JOSEException {
+        AuthenticationResponse res = authenticationServiceImpl.refreshToken(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .code(1000)
+                .result(res)
                 .build();
     }
 }

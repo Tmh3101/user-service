@@ -3,6 +3,7 @@ package com.Tmh3101.user_manager.service.Impl;
 import com.Tmh3101.user_manager.dto.request.AuthenticationRequest;
 import com.Tmh3101.user_manager.dto.request.IntrospectRequest;
 import com.Tmh3101.user_manager.dto.request.LogoutRequest;
+import com.Tmh3101.user_manager.dto.request.RefreshRequest;
 import com.Tmh3101.user_manager.dto.response.AuthenticationResponse;
 import com.Tmh3101.user_manager.dto.response.IntrospectResponse;
 import com.Tmh3101.user_manager.entity.InvalidatedToken;
@@ -124,6 +125,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                                             .expiryTime(expiryTime)
                                                             .build();
         invalidatedTokenRepo.save(invalidatedToken);
+    }
+
+    @Override
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jti = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jti)
+                .expiryTime(expiryTime)
+                .build();
+        invalidatedTokenRepo.save(invalidatedToken);
+
+        User user = userRepo.findUserByEmail(signToken.getJWTClaimsSet().getSubject())
+                .orElseThrow(() ->
+                        new AppException(ErrorCode.UNCATEGORIZED_ERROR)
+                );
+
+        var token = generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .build();
+
     }
 
     private String buildScope(User user){
